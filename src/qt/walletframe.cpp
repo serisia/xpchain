@@ -13,6 +13,8 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPainter>
+#include <QPaintEvent>
 
 WalletFrame::WalletFrame(const PlatformStyle *_platformStyle, BitcoinGUI *_gui) :
     QFrame(_gui),
@@ -30,7 +32,7 @@ WalletFrame::WalletFrame(const PlatformStyle *_platformStyle, BitcoinGUI *_gui) 
     noWallet->setAlignment(Qt::AlignCenter);
     walletStack->addWidget(noWallet);
 
-    setStyleSheet("WalletFrame { background-image: url(:/icons/wallpaper); }");
+    wallpaper.load(":/icons/wallpaper");
 }
 
 WalletFrame::~WalletFrame()
@@ -217,4 +219,14 @@ WalletView *WalletFrame::currentWalletView()
 void WalletFrame::outOfSyncWarningClicked()
 {
     Q_EMIT requestedSyncWarningInfo();
+}
+
+void WalletFrame::paintEvent(QPaintEvent *event)
+{
+    QPainter paint(this);
+    int widWidth = this->width();
+    int widHeight = this->height();
+    QPixmap pixmap = wallpaper.scaled(widWidth, widHeight, Qt::KeepAspectRatioByExpanding);
+    paint.drawPixmap(0, 0, pixmap);
+    QWidget::paintEvent(event);
 }

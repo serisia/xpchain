@@ -59,8 +59,11 @@ private:
 
     const PlatformStyle *platformStyle;
 
+    QPixmap wallpaper;
+
 public:
     WalletView *currentWalletView();
+    void paintEvent(QPaintEvent *event);
 
 public Q_SLOTS:
     /** Switch to overview (home) page */
