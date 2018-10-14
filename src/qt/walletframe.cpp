@@ -228,5 +228,5 @@ void WalletFrame::paintEvent(QPaintEvent *event)
     int widHeight = this->height();
     QPixmap pixmap = wallpaper.scaled(widWidth, widHeight, Qt::KeepAspectRatioByExpanding);
     paint.drawPixmap(0, 0, pixmap);
-    QWidget::paintEvent(event);
+    QFrame::paintEvent(event);
 }
