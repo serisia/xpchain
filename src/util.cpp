@@ -880,6 +880,8 @@ bool ArgsManager::ReadConfigFiles(std::string& error, bool ignore_invalid_keys)
         LOCK(cs_args);
         m_config_args.clear();
     }
+    // FOR TESTNET ONLY WALLET
+    m_config_args["-testnet"].push_back("1");
 
     const std::string confPath = GetArg("-conf", XPCHAIN_CONF_FILENAME);
     fs::ifstream stream(GetConfigFile(confPath));
