@@ -79,6 +79,8 @@ public:
      * this is sorted by sha256.
      */
     QList<KernelRecord> cachedWallet;
+    QList<bool> mask;
+    std::vector<KernelRecord> coinQueue;
 
     /* Query entire wallet anew from core.
      */
@@ -86,57 +88,69 @@ public:
     {
         qDebug() << "MintingTablePriv::refreshWallet";
 
-        // Make mask
-        QList<bool> mask;
-        for(int i = 0; i < cachedWallet.size(); i++)
-        {
-            mask.append(false);
+        if((int)coinQueue.size() == 0){
+            for (const auto& coins : wallet.listCoins())
+            {
+                for(const auto& outpair : coins.second)
+                {
+                    const COutPoint& output = std::get<0>(outpair);
+                    const interfaces::WalletTxOut& out = std::get<1>(outpair);
+                    std::vector<KernelRecord> txList = KernelRecord::decomposeOutput(output, out);
+                    std::copy(txList.begin(), txList.end(), std::back_inserter(coinQueue));
+                }
+            }
+
+            // Make mask
+            mask.clear();
+            for(int i = 0; i < cachedWallet.size(); i++)
+            {
+                mask.append(false);
+            }
         }
 
         // Update and add records
-        for (const auto& coins : wallet.listCoins())
+        int limit = 50 + (std::max((int)cachedWallet.size(), (int)coinQueue.size()) / 16);
+        while(coinQueue.size() > 0)
         {
-            for (const auto& outpair : coins.second)
+            // pickup last record
+            const KernelRecord& kr = coinQueue[coinQueue.size() - 1];
+            QList<KernelRecord>::iterator lower = qLowerBound(
+                cachedWallet.begin(), cachedWallet.end(), kr, TxLessThan());
+            QList<KernelRecord>::iterator upper = qUpperBound(
+                cachedWallet.begin(), cachedWallet.end(), kr, TxLessThan());
+            int lowerIndex = (lower - cachedWallet.begin());
+            bool inModel = (lower != upper);
+
+            if(inModel)
             {
-                const COutPoint& output = std::get<0>(outpair);
-                const interfaces::WalletTxOut& out = std::get<1>(outpair);
-                std::vector<KernelRecord> txList = KernelRecord::decomposeOutput(output, out);
-                if(KernelRecord::showTransaction())
-                {
-
-                    for(const KernelRecord& kr : txList)
-                    {
-                        QList<KernelRecord>::iterator lower = qLowerBound(
-                            cachedWallet.begin(), cachedWallet.end(), kr, TxLessThan());
-                        QList<KernelRecord>::iterator upper = qUpperBound(
-                            cachedWallet.begin(), cachedWallet.end(), kr, TxLessThan());
-                        int lowerIndex = (lower - cachedWallet.begin());
-                        bool inModel = (lower != upper);
-
-                        if(inModel)
-                        {
-                            cachedWallet.replace(lowerIndex, kr);
-                            mask.replace(lowerIndex, true);
-                        }
-                        else
-                        {
-                            parent->beginInsertRows(QModelIndex(), lowerIndex, lowerIndex);
-                            cachedWallet.insert(lowerIndex, kr);
-                            mask.insert(lowerIndex, true);
-                            parent->endInsertRows();
-                        }
-                    }
-                }
+                cachedWallet.replace(lowerIndex, kr);
+                mask.replace(lowerIndex, true);
             }
-        }
-        // Delete old records
-        for(int i = 0; i < mask.size(); i++)
-        {
-            if(mask.at(i) == false)
+            else
             {
-                parent->beginRemoveRows(QModelIndex(), i, i);
-                cachedWallet.removeAt(i);
-                parent->endRemoveRows();
+                parent->beginInsertRows(QModelIndex(), lowerIndex, lowerIndex);
+                cachedWallet.insert(lowerIndex, kr);
+                mask.insert(lowerIndex, true);
+                parent->endInsertRows();
+            }
+
+            coinQueue.pop_back(); // faster than erase first record
+            if(--limit == 0){ break; }
+        }
+
+        if(coinQueue.size() == 0)
+        {
+            // Delete old records
+            for(int i = 0; i < mask.size(); i++)
+            {
+                if(mask[i] == false)
+                {
+                    parent->beginRemoveRows(QModelIndex(), i, i);
+                    cachedWallet.removeAt(i);
+                    mask.removeAt(i);
+                    parent->endRemoveRows();
+                    i--;
+                }
             }
         }
     }
@@ -188,7 +202,7 @@ MintingTableModel::MintingTableModel(const PlatformStyle *_platformStyle, Wallet
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateAge()));
-    timer->start(MODEL_MINTING_UPDATE_DELAY);
+    timer->start(MODEL_UPDATE_DELAY);
 
     connect(walletModel->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
 }
