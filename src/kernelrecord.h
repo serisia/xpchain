@@ -30,7 +30,6 @@ public:
     {
     }
 
-    static bool showTransaction();
     static std::vector<KernelRecord> decomposeOutput(const COutPoint& output, const interfaces::WalletTxOut& out);
 
 

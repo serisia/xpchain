@@ -15,11 +15,6 @@
 
 using namespace std;
 
-bool KernelRecord::showTransaction()
-{
-    return true;
-}
-
 /*
  * Decompose CWallet transaction to model kernel records.
  */
