@@ -81,6 +81,7 @@ public:
     QList<KernelRecord> cachedWallet;
     QList<bool> mask;
     std::vector<KernelRecord> coinQueue;
+    int refresh_limit;
 
     /* Query entire wallet anew from core.
      */
@@ -106,10 +107,12 @@ public:
             {
                 mask.append(false);
             }
+
+            refresh_limit = 50 + ((int)coinQueue.size() / 16);
         }
 
         // Update and add records
-        int limit = 50 + (std::max((int)cachedWallet.size(), (int)coinQueue.size()) / 16);
+        int remain = refresh_limit;
         while(coinQueue.size() > 0)
         {
             // pickup last record
@@ -135,7 +138,7 @@ public:
             }
 
             coinQueue.pop_back(); // faster than erase first record
-            if(--limit == 0){ break; }
+            if(--remain == 0){ break; }
         }
 
         if(coinQueue.size() == 0)
