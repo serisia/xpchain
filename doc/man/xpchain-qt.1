@@ -272,6 +272,10 @@ Tor control port to use if onion listening enabled (default:
 .IP
 Tor control port password (default: empty)
 .HP
+\fB\-upnp\fR
+.IP
+Use UPnP to map the listening port (default: 0)
+.HP
 \fB\-whitebind=\fR<addr>
 .IP
 Bind to given address and whitelist peers connecting to it. Use
@@ -391,6 +395,24 @@ Delete all wallet transactions and only recover those parts of the
 blockchain through \fB\-rescan\fR on startup (1 = keep tx meta data e.g.
 account owner and payment request information, 2 = drop tx meta
 data)
+.PP
+ZeroMQ notification options:
+.HP
+\fB\-zmqpubhashblock=\fR<address>
+.IP
+Enable publish hash block in <address>
+.HP
+\fB\-zmqpubhashtx=\fR<address>
+.IP
+Enable publish hash transaction in <address>
+.HP
+\fB\-zmqpubrawblock=\fR<address>
+.IP
+Enable publish raw block in <address>
+.HP
+\fB\-zmqpubrawtx=\fR<address>
+.IP
+Enable publish raw transaction in <address>
 .PP
 Debugging/Testing options:
 .HP
