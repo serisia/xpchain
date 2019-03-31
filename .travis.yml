@@ -4,6 +4,8 @@ os: linux
 language: minimal
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - build-essential
       - libtool
