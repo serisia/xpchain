@@ -2,6 +2,19 @@ sudo: false
 dist: trusty
 os: linux
 language: minimal
+addons:
+  apt:
+    packages:
+      - build-essential
+      - libtool
+      - autotools-dev
+      - automake
+      - pkg-config
+      - bsdmainutils
+      - curl
+      - git
+      - ca-certificates
+      - ccache
 cache:
   ccache: true
   directories:
@@ -26,7 +39,6 @@ env:
     - BASE_OUTDIR=$TRAVIS_BUILD_DIR/out
     - SDK_URL=https://bitcoincore.org/depends-sources/sdks
     - WINEDEBUG=fixme-all
-    - DOCKER_PACKAGES="build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache"
 before_install:
     - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
     - BEGIN_FOLD () { echo ""; CURRENT_FOLD_NAME=$1; echo "travis_fold:start:${CURRENT_FOLD_NAME}"; }
@@ -38,8 +50,6 @@ install:
     - DOCKER_ID=$(docker run $DOCKER_ADMIN -idt --mount type=bind,src=$TRAVIS_BUILD_DIR,dst=$TRAVIS_BUILD_DIR --mount type=bind,src=$CCACHE_DIR,dst=$CCACHE_DIR -w $TRAVIS_BUILD_DIR --env-file /tmp/env $DOCKER_NAME_TAG)
     - DOCKER_EXEC () { docker exec $DOCKER_ID bash -c "cd $PWD && $*"; }
     - if [ -n "$DPKG_ADD_ARCH" ]; then DOCKER_EXEC dpkg --add-architecture "$DPKG_ADD_ARCH" ; fi
-    - travis_retry DOCKER_EXEC apt-get update
-    - travis_retry DOCKER_EXEC apt-get install --no-install-recommends --no-upgrade -qq $PACKAGES $DOCKER_PACKAGES
 before_script:
     - DOCKER_EXEC echo \> \$HOME/.bitcoin  # Make sure default datadir does not exist and is never read by creating a dummy file
     - mkdir -p depends/SDKs depends/sdk-sources
