@@ -147,27 +147,6 @@ public:
                 return;
             }
 
-            // spent
-            const std::vector<CTxIn> ins = wtx.tx->vin;
-            const std::vector<isminetype> isMine = wtx.txin_is_mine;
-            for(uint32_t i = 0; i < ins.size(); i++)
-            {
-                if(isMine[i] == isminetype::ISMINE_SPENDABLE)
-                {
-                    uint256 phash = ins[i].prevout.hash;
-                    uint32_t n = ins[i].prevout.n;
-
-                    for(int i = 0; i < cachedWallet.size(); i++){
-                        if(cachedWallet[i].hash == phash && cachedWallet[i].n == n){
-                            parent->beginRemoveRows(QModelIndex(), i, i);
-                            cachedWallet.removeAt(i);
-                            parent->endRemoveRows();
-                            break;
-                        }
-                    }
-                }
-            }
-
             // append
             int offsetLower = 0;
             for(const KernelRecord& kr : KernelRecord::decomposeOutput(wtx))
@@ -182,6 +161,27 @@ public:
                 parent->endInsertRows();
                 offsetLower++;
             }
+
+            // spent
+            const std::vector<CTxIn> ins = wtx.tx->vin;
+            const std::vector<isminetype> isMine = wtx.txin_is_mine;
+            for(uint32_t i = 0; i < ins.size(); i++)
+            {
+                if(isMine[i] == isminetype::ISMINE_SPENDABLE)
+                {
+                    uint256 phash = ins[i].prevout.hash;
+                    uint32_t n = ins[i].prevout.n;
+
+                    for(int delIndex = 0; delIndex < cachedWallet.size(); delIndex++){
+                        if(cachedWallet[delIndex].hash == phash && cachedWallet[delIndex].n == n){
+                            parent->beginRemoveRows(QModelIndex(), delIndex, delIndex);
+                            cachedWallet.removeAt(delIndex);
+                            parent->endRemoveRows();
+                            break;
+                        }
+                    }
+                }
+            }
         }
         else if(status == CT_UPDATED)
         {
@@ -193,7 +193,7 @@ public:
             parent->beginRemoveRows(QModelIndex(), lowerIndex, upperIndex - 1);
             for(int i = lowerIndex; i < upperIndex; i++)
             {
-                cachedWallet.removeAt(i);
+                cachedWallet.removeAt(lowerIndex); // don't use i
             }
             parent->endRemoveRows();
 
