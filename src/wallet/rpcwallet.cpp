@@ -4765,7 +4765,7 @@ static UniValue listmintings(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() > 5)
+    if (request.fHelp || request.params.size() > 6)
         throw std::runtime_error(
             "listmintings ( period minage maxage  [\"addresses\",...] [include_unsafe] [query_options] )\n"
             "\nReturns array of minting status of transaction outputs\n"
