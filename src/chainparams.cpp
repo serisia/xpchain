@@ -169,9 +169,10 @@ public:
         };
 
         chainTxData = ChainTxData{
-                0,
-                0,
-                0
+            // Data from rpc: getchaintxstats 4096 c0b07c4724947aee201fa7e914a8862cf3ff68a7ed4fced8b4594c0047892bfc
+            /* nTime    */ 1555366097,
+            /* nTxCount */ 451128,
+            /* dTxRate  */ 0.03558840527802424
         };
 
         /* disable fallback fee on mainnet */
@@ -273,9 +274,10 @@ public:
         };
 
         chainTxData = ChainTxData{
-                0,
-                0,
-                0
+            // Data from rpc: getchaintxstats 4096 ae7320f5f9476d7e45a3985befb5c58663a71924dc7c31ab2450eed95fc6a9c8
+            /* nTime    */ 1555366728,
+            /* nTxCount */ 400660,
+            /* dTxRate  */ 0.06009108481724461
         };
 
         /* enable fallback fee on testnet */
