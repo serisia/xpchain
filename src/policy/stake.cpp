@@ -60,7 +60,7 @@ bool IsDestinationSame(const CScript& a, const CScript& b)
         return false;
     }
 
-    if (aDest != bDest) {
+    if (!(aDest == bDest)) {
         return false;
     }
 
