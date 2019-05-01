@@ -20,6 +20,7 @@
 #include <pow.h>
 #include <primitives/transaction.h>
 #include <script/standard.h>
+#include <shutdown.h>
 #include <timedata.h>
 #include <util.h>
 #include <utilmoneystr.h>
@@ -717,6 +718,12 @@ void BitcoinMinter(const std::shared_ptr<CWallet>& wallet)
             }
 
             for (COutput coin : vCoins) {
+
+                // check : Is wallet shutting down
+                if(ShutdownRequested()){
+                    return;
+                }
+
                 CBlockIndex* pprevIndex;
                 if(!GetPrevBlockIndex(coin, &pprevIndex)){
                     continue;
